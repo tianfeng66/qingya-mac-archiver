@@ -39,7 +39,7 @@
 
 ## 下载安装
 
-1. 到 [Releases](../../releases/latest) 下载 `轻压-v1.0.zip`，解压后把「轻压.app」拖进「应用程序」文件夹。
+1. 到 [Releases](../../releases/latest) 下载 `QingYa-v1.0.zip`，解压后把「轻压.app」拖进「应用程序」文件夹。
 2. 这个 App 没有苹果开发者签名，第一次打开前需要在「终端」运行一次：
 
    ```bash
