@@ -1,3 +1,8 @@
 build/
 dist/
 .DS_Store
+windows/.venv/
+__pycache__/
+*.pyc
+*.pyo
+selftest-result.txt

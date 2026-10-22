@@ -5,14 +5,14 @@
 <h1 align="center">轻压 QingYa</h1>
 
 <p align="center">
-  原生 macOS 压缩 / 解压工具。拖进来就能用，Windows 发来的 zip 中文不乱码。<br>
-  <sub>A native macOS archiver: smart extraction, GBK/Big5 filename detection, zip AES-256, split volumes.</sub>
+  原生 macOS 压缩 / 解压工具，并提供同样用法的 Windows 版。拖进来就能用，Windows 发来的 zip 中文不乱码。<br>
+  <sub>A macOS archiver, plus a Windows build with the same flow: smart extraction, GBK filename detection, zip AES-256, split volumes.</sub>
 </p>
 
 <p align="center">
   <img src="https://img.shields.io/badge/macOS-13%2B-blue" alt="macOS 13+">
+  <img src="https://img.shields.io/badge/Windows-10%2B-blue" alt="Windows 10+">
   <img src="https://img.shields.io/badge/Apple%20Silicon%20%2B%20Intel-universal-green" alt="Universal">
-  <img src="https://img.shields.io/badge/Swift-SwiftUI-orange" alt="SwiftUI">
   <img src="https://img.shields.io/badge/license-MIT-lightgrey" alt="MIT">
 </p>
 
@@ -20,7 +20,13 @@
   <img src="docs/screenshots/main.png" width="720" alt="主窗口">
 </p>
 
-综合了 **The Unarchiver**（智能解压、乱码识别）、**Keka**（拖拽压缩、分卷、排除系统文件）、**BetterZip / Bandizip**（浏览内容、选择性解压、密码本）的做法。引擎是 macOS 自带的 libarchive，不用装任何依赖，整个 App 约 3 MB。
+综合了 **The Unarchiver**（智能解压、乱码识别）、**Keka**（拖拽压缩、分卷、排除系统文件）、**BetterZip / Bandizip**（浏览内容、选择性解压、密码本）的做法。
+
+macOS 版的引擎是系统自带的 libarchive，不用装任何依赖，整个 App 约 3 MB。Windows 版是同一套操作，安装包里已经带好运行库和 7-Zip（用来解 RAR / ISO / CAB）。
+
+<p align="center">
+  <img src="docs/screenshots/windows.png" width="720" alt="Windows 版主窗口">
+</p>
 
 ## 功能
 
@@ -39,6 +45,8 @@
 
 ## 下载安装
 
+### macOS
+
 1. 到 [Releases](../../releases/latest) 下载 `QingYa-v1.0.zip`，解压后把「轻压.app」拖进「应用程序」文件夹。
 2. 这个 App 没有苹果开发者签名，第一次打开前需要在「终端」运行一次：
 
@@ -49,6 +57,14 @@
    不想用终端也可以：双击 App → 弹出拦截提示时点「完成」→「系统设置 → 隐私与安全性」→ 拉到最下面点「仍要打开」。
 3. （推荐）「轻压 → 设置 → 系统集成」→「设为压缩包的默认打开方式」，以后双击 zip / rar / 7z 就直接解压。
 
+### Windows
+
+1. 到 [Releases](../../releases/latest) 下载 `QingYa-Windows-v1.1.zip`，解压到一个固定文件夹（例如「文档\轻压」）。
+2. 双击里面的 `QingYa.exe`。如果系统提示「Windows 已保护你的电脑」，点「更多信息」→「仍要运行」。这个程序没有微软签名，所以会先拦一次。
+3. （推荐）打开后点「设置」→「添加到右键菜单」。压缩包里的《先看这里.txt》有详细用法。
+
+不要把 `QingYa.exe` 单独拷走，它需要旁边的 `7z.exe` 才能解 RAR。
+
 ## 支持的格式
 
 | | 格式 |
@@ -57,6 +73,8 @@
 | 压缩 | zip（可设 AES-256 密码）、7z、tar、tar.gz、tar.bz2、tar.xz，均可分卷 |
 
 **已知限制**：macOS 自带的 libarchive 解不开**带密码的 RAR / 7z**，也不支持 zstd / lz4。装了 7-Zip（`brew install sevenzip`）后，加密的 RAR / 7z 会自动交给它处理，7z 压缩也能设密码并加密文件名。
+
+Windows 版用 Python 引擎处理 zip（含 AES-256 密码和 GBK 文件名）、7z（可设密码并加密文件名）、tar.gz / tar.bz2 / tar.xz。RAR、ISO、CAB 交给安装包里附带的 7-Zip。zstd / lz4 只有在旁边有 `7z.exe` 时才能解。
 
 ## 从源码构建
 
@@ -78,6 +96,27 @@ xcrun swiftc -swift-version 5 -O -import-objc-header Sources/Bridge/libarchive.h
     -framework Security Sources/Engine/*.swift Tests/main.swift -o build/selftest
 ./build/selftest "$PWD/build"
 ```
+
+### Windows
+
+需要 Python 3.9 或更高版本，以及 [7-Zip](https://www.7-zip.org)（用来打安装包、解 RAR）：
+
+```powershell
+py -3 -m pip install -r windows/requirements.txt
+cd windows
+py -3 -m unittest tests.test_engine
+cd ..
+py -3 windows/main.py
+```
+
+打出给别人用的 zip（在 Windows 上，已安装 7-Zip）：
+
+```powershell
+py -3 -m pip install pyinstaller
+powershell -ExecutionPolicy Bypass -File windows/build_windows.ps1
+```
+
+产物是 `dist/QingYa-Windows-v1.1.zip`。自动打包脚本在 `windows/ci-windows.yml`，复制到 `.github/workflows/windows.yml` 后，每次推送到 `main` 就会由 GitHub Actions 打包。当前登录还不能上传这个目录，所以还没启用。
 
 ## 实现要点
 
@@ -110,7 +149,11 @@ xcrun swiftc -swift-version 5 -O -import-objc-header Sources/Bridge/libarchive.h
 | `Sources/App/PasswordStore.swift` | 密码本（钥匙串） |
 | `Sources/App/App.swift` | 入口、访达打开、程序坞拖放、服务菜单 |
 | `Tools/main.swift` | 生成图标 |
-| `Tests/main.swift` | 引擎自检 |
+| `Tests/main.swift` | macOS 引擎自检 |
+| `windows/main.py` | Windows 版入口 |
+| `windows/qingya/` | Windows 版界面和引擎（编码、解压、压缩、密码本、右键菜单） |
+| `windows/tests/test_engine.py` | Windows 引擎和界面自检 |
+| `windows/先看这里.txt` | 放进 Windows 安装包的使用说明 |
 
 ## 隐私
 

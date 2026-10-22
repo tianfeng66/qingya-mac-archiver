@@ -1,0 +1,7 @@
+pyzipper==0.3.6
+py7zr==0.22.0
+rarfile==4.2
+charset-normalizer==3.4.1
+keyring==25.5.0
+PySide6==6.7.3
+Pillow==10.4.0

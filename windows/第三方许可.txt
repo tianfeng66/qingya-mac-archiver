@@ -1,0 +1,10 @@
+轻压 Windows 版随包附带 7-Zip 的命令行程序，用来解 RAR、ISO、CAB 以及少量 Python 引擎处理不了的格式。
+
+7-Zip
+  版权归 Igor Pavlov 所有
+  许可：GNU LGPL + unRAR 限制
+  官网：https://www.7-zip.org
+  源码：https://www.7-zip.org/download.html
+
+轻压自己的代码使用 MIT 许可，见仓库根目录的 LICENSE。
+7-Zip 是独立程序（7z.exe / 7z.dll），轻压通过命令行调用它，没有改过它的源码。

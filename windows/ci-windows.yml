@@ -1,0 +1,49 @@
+name: Windows
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "windows/**"
+      - ".github/workflows/windows.yml"
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install 7-Zip
+        run: choco install 7zip --yes --no-progress
+
+      - name: Install dependencies
+        run: python -m pip install -r windows/requirements.txt pyinstaller
+
+      - name: Test
+        working-directory: windows
+        env:
+          QT_QPA_PLATFORM: offscreen
+        run: python -m unittest tests.test_engine
+
+      - name: Package
+        run: powershell -ExecutionPolicy Bypass -File windows/build_windows.ps1
+
+      - name: Frozen self-test
+        env:
+          QINGYA_SELFTEST: selftest-result.txt
+          QT_QPA_PLATFORM: offscreen
+        run: |
+          ./dist/pyi/QingYa/QingYa.exe --self-test
+          Get-Content selftest-result.txt
+          if ((Get-Content selftest-result.txt -TotalCount 1) -ne "OK") { exit 1 }
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: QingYa-Windows-v1.1
+          path: dist/QingYa-Windows-v1.1.zip
+          if-no-files-found: error
